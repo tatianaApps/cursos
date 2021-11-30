@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Usuario;
+use App\Models\Curso;
 
 class UsuariosController extends Controller
 {
@@ -25,10 +26,17 @@ class UsuariosController extends Controller
     	$usuario->pass = $datos->pass;
         $usuario->activado = $datos->activado = 1;
 
+        if(isset($datos->email))
+            $usuario->email = $datos->email;
+
     	//Escribir en la base de datos
     	try{
-    		$usuario->save();
-    		$respuesta['msg'] = "Usuario guardado con id ".$usuario->id;
+            if (Usuario::where('email', '=', $datos->email)->first()) { //first comprueba la primera coincidencia
+                $respuesta['msg'] = "El email ya existe, pruebe con otro";
+            }else {
+                $usuario->save();
+                $respuesta['msg'] = "Usuario guardado con id ".$usuario->id;
+            } 
     	}catch(\Exception $e){
     		$respuesta['status'] = 0;
     		$respuesta['msg'] = "Se ha producido un error: ".$e->getMessage();
@@ -101,20 +109,51 @@ class UsuariosController extends Controller
     public function ver($id, Request $req){
 
         $respuesta = ['status' => 1, "msg" => ""];
-        $datos = $req->getContent();
-    	$datos = json_decode($datos);
 
         try{
-            //$usuario = DB::table('usuarios');
             $usuario = Usuario::find($id);
-            //->cursos()
-            //->get();
-            $usuario->cursos;
-            return response()->json($usuario);
-            /*foreach($usuario->cursos as $curso){
-                echo $curso->adquisicion->created_at;
+            $respuesta['datos'] = $usuario;
+        }catch(\Exception $e){
+            $respuesta['status'] = 0;
+            $respuesta['msg'] = "Se ha producido un error: ".$e->getMessage();
+        }
+
+        return response()->json($respuesta);
+    }
+
+    public function adquirirCursos($id,$id_curso){
+
+        $respuesta = ['status' => 1, "msg" => ""];
+
+        try{
+            $usuario = Usuario::find($id);
+            $curso = Curso::find($id_curso);
+
+            if($usuario && $curso){
+               $usuario->cursos()->attach($curso); 
+               $respuesta['msg'] = "Curso adquirido";
             }
-            $respuesta['datos'] = $usuario;*/
+            else{
+                $respuesta['status'] = 0;
+                $respuesta['msg'] = "Usuario y/o curso no encontrado".$e->getMessage();
+            }
+
+        }catch(\Exception $e){
+            $respuesta['status'] = 0;
+            $respuesta['msg'] = "Se ha producido un error: ".$e->getMessage();
+        }
+
+        return response()->json($respuesta);
+    }
+
+    public function verCursosAdquiridos($id){
+
+        $respuesta = ['status' => 1, "msg" => ""];
+
+        try{
+            $usuario = Usuario::find($id);
+            $usuario->cursos;
+            $respuesta['datos'] = $usuario;
         }catch(\Exception $e){
             $respuesta['status'] = 0;
             $respuesta['msg'] = "Se ha producido un error: ".$e->getMessage();

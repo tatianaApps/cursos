@@ -22,6 +22,8 @@ Route::prefix('usuarios')->group(function(){
 	Route::post('/desactivar_usuario/{id}',[UsuariosController::class,'desactivar_usuario']);
 	Route::post('/editar/{id}',[UsuariosController::class,'editar']);
 	Route::get('/ver/{id}',[UsuariosController::class,'ver']);
+	Route::put('/adquirirCursos/{id}/{id_curso}',[UsuariosController::class,'adquirirCursos']);
+	Route::get('/verCursosAdquiridos/{id}',[UsuariosController::class,'verCursosAdquiridos']);
 });
 
 Route::prefix('cursos')->group(function(){
