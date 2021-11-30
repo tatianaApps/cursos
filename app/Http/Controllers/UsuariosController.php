@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\Usuario;
 
 class UsuariosController extends Controller
@@ -74,7 +75,7 @@ class UsuariosController extends Controller
             $usuario = Usuario::find($id);
 
             if($usuario){
-                //VALIDAR LOS DATOS
+                //Validar los datos
                 if(isset($datos->nombre))
                     $usuario->nombre = $datos->nombre;
                 if(isset($datos->foto))
@@ -97,13 +98,23 @@ class UsuariosController extends Controller
         return response()->json($respuesta);
     }
 
-    public function ver($id){
-        $respuesta = ['status' => 1, "msg" => ""];
+    public function ver($id, Request $req){
 
-        //Buscar a la persona
+        $respuesta = ['status' => 1, "msg" => ""];
+        $datos = $req->getContent();
+    	$datos = json_decode($datos);
+
         try{
+            //$usuario = DB::table('usuarios');
             $usuario = Usuario::find($id);
-            $respuesta['datos'] = $usuario;
+            //->cursos()
+            //->get();
+            $usuario->cursos;
+            return response()->json($usuario);
+            /*foreach($usuario->cursos as $curso){
+                echo $curso->adquisicion->created_at;
+            }
+            $respuesta['datos'] = $usuario;*/
         }catch(\Exception $e){
             $respuesta['status'] = 0;
             $respuesta['msg'] = "Se ha producido un error: ".$e->getMessage();

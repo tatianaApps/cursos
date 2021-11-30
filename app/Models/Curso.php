@@ -12,7 +12,9 @@ class Curso extends Model
 
     public function videos(){
     	return $this->hasMany(Video::class,'cursos_id');
-    	}
+    }
 
-    
+    public function usuarios(){
+        return $this->belongsToMany(Usuario::class);
+    }
 }
